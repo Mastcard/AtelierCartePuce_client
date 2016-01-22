@@ -24,7 +24,7 @@ public class UDPClient implements Runnable {
     private static Logger log = Logger.getLogger(UDPClient.class);
 
     /** The Constant BUFFER_SIZE. */
-    private static final int BUFFER_SIZE = 32;
+    private static final int BUFFER_SIZE = 1024;
 
     /** The buffer. */
     private byte buffer[] = new byte[BUFFER_SIZE];
@@ -68,7 +68,8 @@ public class UDPClient implements Runnable {
 
             // Datagram socket.
             log.debug("Creating the DatagramSocket...");
-            DatagramSocket socket = new DatagramSocket();
+            DatagramSocket socket = new DatagramSocket(5554, ip);
+            //socket.bind(new InetSocketAddress(ip, port));
             log.debug("Done.");
 
             // Datagram packet.
@@ -85,17 +86,13 @@ public class UDPClient implements Runnable {
             socket.send(dataToSend);
             log.debug("Done.");
 
-            // Read response
-            DatagramPacket dataToReceive = new DatagramPacket(new byte[BUFFER_SIZE], BUFFER_SIZE);
-            log.debug("Reading response...");
-
             try {
+            	// Read response
+            	DatagramPacket dataToReceive = new DatagramPacket(new byte[BUFFER_SIZE], BUFFER_SIZE);
+            	log.debug("Reading response...");
                 socket.receive(dataToReceive);
                 response = new String(dataToReceive.getData()).substring(0, dataToReceive.getLength());
-                
-                /**
-                 * TODO exploit response in an asynchronous way
-                 */
+                NetworkCommunicator.executeResponse(response);
                 
             } catch(SocketException e) {
                 e.printStackTrace();
